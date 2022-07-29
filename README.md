@@ -10,6 +10,7 @@ import logger from '@console/logging';
 
 2. 自定义`logger`
 ```ts
+import {getLogger} from '@console/logging';
 const logger = getLogger({
     level: 'trace' | 'debug' | 'info' | 'warn' | 'error', // 必填(required)
     module: string, // default ''

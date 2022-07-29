@@ -5,9 +5,9 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/feyond/console-logger.git"
+    "url": "https://github.com/feyond/console-logging.git"
   },
-  "homepage": "https://github.com/feyond/console-logger",
+  "homepage": "https://github.com/feyond/console-logging",
   "main": "index.js",
   "scripts": {
     "build": "rm -rf ./dist && ./node_modules/.bin/esbuild ./src/index.ts --target=chrome58 --bundle --sourcemap --minify --outfile=dist/index.js",
