@@ -1,4 +1,4 @@
-# @console/logging
+# @feyond/console-logging
 浏览器控制台日志打印控制
 
 ## Usage
