@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
+    "outDir": "/dist",
     "module": "ESNext",
     "target": "es5",
     "strict": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "moduleResolution": "Node",
+    "allowJs": false,
+    "noImplicitAny": true,
+    "removeComments": true,
   },
   "exclude": [
-    "node_modules"
+    "node_modules", "dist", "test"
   ]
 }

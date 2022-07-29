@@ -45,12 +45,12 @@ const _configs: LoggerStyle = {
     },
     level: {
         weight: 400,
-        format: (level: string) => `[${level}]`.padEnd(7, ' '),
+        format: (level: string) => `[${level.toUpperCase()}]`.padEnd(7, ' '),
     },
     module: {
         color: '#aaa',
         weight: 400,
-        format: (module: string) => module.padStart(12, ' '),
+        format: (module: string) => `[${module}]`.padStart(10, ' '),
     }
 }
 const noop = function () {}
@@ -59,7 +59,7 @@ export function getLogger(opts: Options = {level: "info"}) {
     const logger: Logger = {} as Logger;
     const userLevel = _LoggingLevels.findIndex(_level => _level === (opts.level || "info"));
     const shouldLog = (level: number) => {
-        return userLevel >= level;
+        return level >= userLevel;
     }
 
     const configs: LoggerStyle = {
@@ -83,7 +83,7 @@ export function getLogger(opts: Options = {level: "info"}) {
         const log = (message?: string, ...optionalParams: any[]) => {
             const _level = configs.level.format!(method);
             const _date = new Date().toISOString();
-            const _message = `%c${_level}%c${_date}%c${_module} %c${message}`;
+            const _message = `%c${_date} %c${_level} %c${_module} %c${message}`;
             let style = getStyle(method);
             console[method](_message,
                 getStyle(method, 'level'),
@@ -98,5 +98,5 @@ export function getLogger(opts: Options = {level: "info"}) {
 }
 
 export default getLogger({
-    level: "error"
+    level: "info"
 });
