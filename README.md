@@ -5,12 +5,12 @@
 
 1. 内置`logger`, `level = info`
 ```ts
-import logger from '@console/logging';
+import logger from '@feyond/console-logging';
 ```
 
 2. 自定义`logger`
 ```ts
-import {getLogger} from '@console/logging';
+import {getLogger} from '@feyond/console-logging';
 const logger = getLogger({
     level: 'trace' | 'debug' | 'info' | 'warn' | 'error', // 必填(required)
     module: string, // default ''
