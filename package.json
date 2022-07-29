@@ -2,6 +2,11 @@
   "name": "console-logger",
   "version": "0.0.1",
   "description": "Browser console log printing wrapper supports log level control.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/feyond/console-logger.git"
+  },
+  "homepage": "https://github.com/feyond/console-logger",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,5 +19,8 @@
     "logging"
   ],
   "author": "feyond",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  }
 }
