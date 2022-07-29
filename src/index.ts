@@ -26,7 +26,8 @@ type LoggerStyle = {
 interface Options {
     level: LoggingLevels,
     module?: string,
-    styles?: Partial<LoggerStyle>
+    styles?: Partial<LoggerStyle>,
+    hack?: boolean
 }
 const _configs: LoggerStyle = {
     colors: {
@@ -93,10 +94,19 @@ export function getLogger(opts: Options = {level: "info"}) {
                 ...optionalParams);
         }
         logger[method] = shouldLog(level) ? log : noop
-    })
-    return logger
+    });
+
+    if (opts.hack) {
+        _LoggingLevels.forEach(value => {
+            console[value] = logger[value];
+        });
+
+        console.log = logger.info;
+    }
+    return logger;
 }
 
 export default getLogger({
-    level: "info"
+    level: "info",
+    hack: true
 });
