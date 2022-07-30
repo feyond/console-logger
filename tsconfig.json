@@ -10,9 +10,9 @@
     "allowJs": false,
     "noImplicitAny": true,
     "removeComments": true,
-    "declaration": true
+    "declaration": false
   },
   "exclude": [
-    "node_modules", "dist", "test"
+    "node_modules", "dist", "test", "index.d.ts"
   ]
 }

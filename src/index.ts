@@ -121,6 +121,7 @@ export function getLogger(opts: Options = {level: "info"}) {
 	return logger;
 }
 
-export default getLogger({
+const logger: Logger = getLogger({
 	level: "info"
 });
+export default logger;

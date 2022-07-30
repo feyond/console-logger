@@ -1,6 +1,6 @@
 {
   "name": "@feyond/console-logging",
-  "version": "1.0.8",
+  "version": "1.0.0",
   "description": "Browser console log printing wrapper supports log level control.",
   "type": "module",
   "repository": {
@@ -10,14 +10,16 @@
   "homepage": "https://github.com/feyond/console-logging",
   "main": "cjs/index.min.js",
   "module": "esm/index.min.js",
-  "types": "esm/index.d.js",
+  "types": "index.d.js",
   "scripts": {
-    "build": "rollup -c",
+    "build": "npm run build:types && rollup -c",
     "test": "jest",
-    "lint": "eslint --fix 'src/**/*.ts'"
+    "lint": "eslint --fix 'src/**/*.ts'",
+    "build:types": "yarn tsc -d --emitDeclarationOnly --outDir ./"
   },
   "files": [
     "README.md",
+    "index.d.js",
     "dist",
     "cjs",
     "esm"
