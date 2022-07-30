@@ -10,7 +10,7 @@
   "homepage": "https://github.com/feyond/console-logging",
   "main": "cjs/index.min.js",
   "module": "esm/index.min.js",
-  "types": "index.d.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "npm run build:types && rollup -c",
     "test": "jest",
@@ -19,7 +19,7 @@
   },
   "files": [
     "README.md",
-    "index.d.js",
+    "index.d.ts",
     "dist",
     "cjs",
     "esm"
