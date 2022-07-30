@@ -3,13 +3,14 @@
     "baseUrl": "./src",
     "outDir": "./dist/index.js",
     "module": "ESNext",
-    "target": "ES5",
+    "target": "ESNext",
     "strict": true,
     "sourceMap": true,
     "moduleResolution": "Node",
     "allowJs": false,
     "noImplicitAny": true,
     "removeComments": true,
+    "declaration": true
   },
   "exclude": [
     "node_modules", "dist", "test"
