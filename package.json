@@ -1,6 +1,6 @@
 {
   "name": "@feyond/console-logging",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Browser console log printing wrapper supports log level control.",
   "type": "module",
   "repository": {
