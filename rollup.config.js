@@ -15,13 +15,13 @@ export default {
     input: 'src/index.ts',
     output: [
         {
-            file: "dist/index.js",
+            file: "cjs/index.js",
             format: 'cjs',
             name: pkg.name,
             banner,
         },
         {
-            file: "dist/index.min.js",
+            file: "cjs/index.min.js",
             format: 'cjs',
             name: pkg.name,
             banner,
@@ -40,12 +40,19 @@ export default {
             banner,
             plugins: [terser()]
         },
-        // {
-        //     file: "dist/index.browser.js",
-        //     format: 'iife',
-        //     name: pkg.name,
-        //     plugins: [terser()]
-        // }
+        {
+            file: "dist/index.js",
+            format: 'iife',
+            name: "clog",
+            banner,
+        },
+        {
+            file: "dist/index.min.js",
+            format: 'iife',
+            name: "clog",
+            banner,
+            plugins: [terser()]
+        }
     ],
     external: [
         ...Object.keys(pkg.dependencies || {}),
@@ -53,10 +60,10 @@ export default {
     ],
     plugins: [
         clear({
-            targets: ['dist', 'es']
+            targets: ['dist', 'cjs', 'esm']
         }),
         typescript({
-            typescript: require('typescript')
+            typescript: require('typescript'),
         })
     ]
 };

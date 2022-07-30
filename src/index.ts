@@ -54,7 +54,21 @@ const _configs: LoggerStyle = {
 	}
 };
 const noop = function () {};
+const getNormalizedMethod = function (method: LoggingLevels) {
+	switch (method) {
+		case 'trace':
+		case 'debug':
+		case 'info':
+			return method;
+		case 'warn':
+		case 'error':
+			return 'log';
+		default:
+			const _exhaustiveCheck: never = method;
+			return _exhaustiveCheck;
 
+	}
+};
 export function getLogger(opts: Options = {level: "info"}) {
 	const logger: Logger = {} as Logger;
 	const userLevel = _LoggingLevels.findIndex(_level => _level === (opts.level || "info"));
@@ -98,7 +112,9 @@ export function getLogger(opts: Options = {level: "info"}) {
 			const _date = new Date().toISOString();
 			const _message = `%c${_date} ${_level}${_module}%c${message}`;
 			const styles = getStyles(method, _level);
-			console[method](_message, ...styles, ...optionalParams);
+
+			const normalizedMethod = getNormalizedMethod(method);
+			console[normalizedMethod](_message, ...styles, ...optionalParams);
 		};
 		logger[method] = shouldLog(level) ? log : noop;
 	});
