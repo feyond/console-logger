@@ -1,29 +1,27 @@
 {
   "name": "@feyond/console-logging",
-  "version": "1.0.11",
+  "version": "1.1.0",
   "description": "Browser console log printing wrapper supports log level control.",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/feyond/console-logging.git"
-  },
   "homepage": "https://github.com/feyond/console-logging",
-  "main": "cjs/index.min.js",
-  "module": "esm/index.min.js",
-  "types": "index.d.ts",
-  "scripts": {
-    "build": "npm run build:types && rollup -c",
-    "test": "jest",
-    "lint": "eslint --fix 'src/**/*.ts'",
-    "build:types": "yarn tsc -d --emitDeclarationOnly --outDir ./"
-  },
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "typings": "./lib/index.d.ts",
+  "browser": "./lib/index.js",
   "files": [
     "README.md",
-    "index.d.ts",
-    "dist",
-    "cjs",
-    "esm"
+    "lib/"
   ],
+  "scripts": {
+    "build": "rollup -c && npm run build:types",
+    "tsc:all": "npm run build:types && npm run build:cjs && npm run build:esm",
+    "tsc:esm": "tsc -p tsconfig.esm.json",
+    "tsc:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir ./lib",
+    "prepublish": "npm run build",
+    "test": "jest",
+    "lint": "eslint --ext .ts",
+    "lint:fix": "eslint --fix --ext .ts"
+  },
   "keywords": [
     "console.log",
     "console.debug",
@@ -34,18 +32,29 @@
   ],
   "author": "feyond",
   "license": "ISC",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/feyond/console-logging.git"
+  },
   "devDependencies": {
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-typescript": "^8.3.4",
     "@types/jest": "^28.1.6",
-    "@typescript-eslint/eslint-plugin": "^5.31.0",
-    "@typescript-eslint/parser": "^5.31.0",
-    "eslint": "^8.20.0",
+    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/parser": "^5.32.0",
+    "eslint": "^8.21.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "jest": "^28.1.3",
     "rollup": "^2.77.2",
-    "rollup-plugin-clear": "^2.0.7",
+    "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.32.1",
     "ts-jest": "^28.0.7",
     "ts-node": "^10.9.1",
+    "tslib": "^2.4.0",
     "typescript": "^4.7.4"
   }
 }

@@ -1,7 +1,12 @@
-import typescript from 'rollup-plugin-typescript2';
-import pkg from './package.json';
-import clear from 'rollup-plugin-clear'
-import {terser} from "rollup-plugin-terser";
+import resolve from "@rollup/plugin-node-resolve";
+import pkg from "./package.json";
+import cjs from "./tsconfig.cjs.json";
+import esm from "./tsconfig.esm.json";
+import typescript from "@rollup/plugin-typescript";
+import del from "rollup-plugin-delete";
+import babel from "@rollup/plugin-babel";
+import commonjs from "@rollup/plugin-commonjs";
+import { terser } from "rollup-plugin-terser";
 
 const banner = `
   /**
@@ -11,59 +16,40 @@ const banner = `
    * Released under the ${pkg.license} license.
    */
 `;
+const _output = {
+	banner,
+};
 export default {
-    input: 'src/index.ts',
-    output: [
-        {
-            file: "cjs/index.js",
-            format: 'cjs',
-            name: pkg.name,
-            banner,
-        },
-        {
-            file: "cjs/index.min.js",
-            format: 'cjs',
-            name: pkg.name,
-            banner,
-            plugins: [terser()]
-        },
-        {
-            file: "esm/index.js",
-            format: 'esm',
-            name: pkg.name,
-            banner,
-        },
-        {
-            file: "esm/index.min.js",
-            format: 'esm',
-            name: pkg.name,
-            banner,
-            plugins: [terser()]
-        },
-        {
-            file: "dist/index.js",
-            format: 'iife',
-            name: "clog",
-            banner,
-        },
-        {
-            file: "dist/index.min.js",
-            format: 'iife',
-            name: "clog",
-            banner,
-            plugins: [terser()]
-        }
-    ],
-    external: [
-        ...Object.keys(pkg.dependencies || {}),
-        ...Object.keys(pkg.devDependencies || {}),
-    ],
-    plugins: [
-        clear({
-            targets: ['dist', 'cjs', 'esm']
-        }),
-        typescript({
-            typescript: require('typescript'),
-        })
-    ]
+	input: "src/index.ts",
+	output: [
+		{
+			..._output,
+			dir: cjs.compilerOptions.outDir,
+			format: "cjs",
+		},
+		{
+			..._output,
+			dir: esm.compilerOptions.outDir,
+			format: "esm",
+		},
+		{
+			..._output,
+			file: pkg.browser,
+			format: "iife",
+			name: pkg.name.replace(/^@.*\//, "").replace("-", "_").replace(".", "_"),
+		},
+	],
+	plugins: [
+		del({ targets: ["lib/*"], runOnce: true, verbose: true }),
+		typescript(),
+		resolve({
+			browser: true
+		}),
+		commonjs(),
+		babel({
+			exclude: "node_modules/**",
+			babelHelpers: "bundled",
+		}),
+		terser(),
+	],
 };

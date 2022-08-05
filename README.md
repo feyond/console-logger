@@ -1,47 +1,28 @@
-# @feyond/console-logging
-浏览器控制台日志打印控制
 
-## Usage
+# Usage
 
-1. 内置`logger`, `level = info`
-```ts
-import logger from '@feyond/console-logging';
+1. Install
+```npm
+npm install @feyond/console-logging
 ```
 
-2. 自定义`logger`
+2. Import default logger(level = debug)
 ```ts
-import {getLogger} from '@feyond/console-logging';
+import { logger } from '@feyond/console-logging';
+
+logger.debug("test debug", { x: 1 });
+logger.info("test info", { y: "aaa" });
+logger.warn("test warn", { ss: true });
+logger.error("test error", { z: { e: 8 } });
+```
+
+2. Custom `logger`
+```ts
+import { getLogger } from '@feyond/console-logging';
 const logger = getLogger({
-    level: 'trace' | 'debug' | 'info' | 'warn' | 'error', // 必填(required)
-    module: string, // default ''
-    styles: LoggerStyle // 自定义Font Color; Font Weight
+    level: 'info', //'debug' | 'info' | 'warn' | 'error',
+    module: string
 });
-```
-- `LoggerStyle`
-```ts
-const _configs: LoggerStyle = {
-	colors: {
-		trace: "#212529",
-		debug: "#0d6efd",
-		info: "#198754",
-		warn: "#ffc107",
-		error: "#dc3545",
-	},
-	weights: {
-		trace: 350,
-		debug: 350,
-		info: 400,
-		warn: 400,
-		error: 400,
-	},
-	level: {
-		weight: 400,
-		format: (level: string) => `%c[${level.toUpperCase()}]`.padEnd(9, " "),
-	},
-	module: {
-		color: "#aaa",
-		weight: 400,
-		format: (module: string) => `%c[${module}]: `.padStart(12, " "),
-	}
-}
+logger.debug("test debug", { x: 1 }); // print nothing
+logger.info("test info", { y: "aaa" });
 ```

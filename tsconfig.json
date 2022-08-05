@@ -1,18 +1,29 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
-    "outDir": "dist",
-    "module": "ESNext",
     "target": "ESNext",
-    "strict": true,
-    "sourceMap": true,
-    "moduleResolution": "Node",
+    "module": "ESNext",
     "allowJs": false,
-    "noImplicitAny": true,
+    "declaration": false,
     "removeComments": true,
-    "declaration": false
+    "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
   },
+  "include": [
+    "src"
+  ],
   "exclude": [
-    "node_modules", "dist", "test", "index.d.ts"
+    "node_modules",
+    "test",
+    "dist",
+    "lib",
+    "esm",
+    "cjs",
+    "ums",
+    "index.d.ts",
+    "typings"
   ]
 }

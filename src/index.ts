@@ -1,127 +1,70 @@
-const _LoggingLevels = ["trace", "debug", "info", "warn", "error"] as const;
-export type LoggingLevels = typeof _LoggingLevels[number];
+const _LoggingLevels = ["debug", "info", "warn", "error"] as const;
+type LoggingLevels = typeof _LoggingLevels[number];
+type Logger = Record<LoggingLevels, (message: string, ...optionalParams: unknown[]) => void>;
 
-type Logger = Record<LoggingLevels, (message?: string, ...optionalParams: any[]) => void>
-
-type RGB = `rgb(${number}, ${number}, ${number})`;
-type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
-type HEX = `#${string}`;
-
-type Color = RGB | RGBA | HEX;
-
-type LoggerStyle = {
-    colors: Partial<Record<LoggingLevels, Color>>,
-    weights: Partial<Record<LoggingLevels, number>>,
-    level: {
-        weight?: number,
-        color?: Color,
-        format?: (level: string) => string
-    }
-    module: {
-        weight?: number,
-        color?: Color,
-        format?: (level: string) => string
-    }
-};
 interface Options {
-    level: LoggingLevels,
-    module?: string,
-    styles?: Partial<LoggerStyle>,
+	module?: string;
 }
-const _configs: LoggerStyle = {
+
+const configs = {
 	colors: {
-		trace: "#212529",
 		debug: "#0d6efd",
 		info: "#198754",
 		warn: "#ffc107",
 		error: "#dc3545",
 	},
-	weights: {
-		trace: 350,
-		debug: 350,
-		info: 400,
-		warn: 400,
-		error: 400,
-	},
 	level: {
-		weight: 400,
-		format: (level: string) => `%c[${level.toUpperCase()}]`.padEnd(9, " "),
+		format: (level: string) => `[${level.toUpperCase()}]`.padEnd(9, " "),
 	},
 	module: {
-		color: "#aaa",
-		weight: 400,
-		format: (module: string) => `%c[${module}]: `.padStart(12, " "),
-	}
+		format: (module?: string) => (!module ? "" : `[${module}]`.padStart(12, " ")),
+	},
 };
-const noop = function () {};
+const noop = () => {};
 const getNormalizedMethod = function (method: LoggingLevels) {
 	switch (method) {
-		case 'trace':
-		case 'debug':
-		case 'info':
+		case "debug":
+		case "info":
 			return method;
-		case 'warn':
-		case 'error':
-			return 'log';
-		default:
-			const _exhaustiveCheck: never = method;
-			return _exhaustiveCheck;
-
+		case "warn":
+		case "error":
+			return "log";
 	}
+	return assertUnreachable(method);
 };
-export function getLogger(opts: Options = {level: "info"}) {
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function assertUnreachable(x: never): never {
+	throw new Error("Didn't expect to get here");
+}
+
+function now(): string {
+	const _now = new Date();
+	return [
+		[_now.getFullYear().toString(), _now.getMonth().toString().padStart(2, "0"), _now.getDate().toString().padStart(2, "0")].join("-"),
+		[_now.getHours().toString().padStart(2, "0"), _now.getMinutes().toString().padStart(2, "0"), _now.getSeconds().toString().padStart(2, "0")].join(":"),
+	].join(" ");
+}
+
+export function getLogger(level: LoggingLevels = "debug", opts: Options = {}) {
 	const logger: Logger = {} as Logger;
-	const userLevel = _LoggingLevels.findIndex(_level => _level === (opts.level || "info"));
+	const userLevel = _LoggingLevels.findIndex((_level) => _level === level);
 	const shouldLog = (level: number) => {
 		return level >= userLevel;
 	};
 
-	const configs: LoggerStyle = {
-		colors: {..._configs.colors, ...opts.styles?.colors || {}},
-		weights: {..._configs.weights, ...opts.styles?.weights || {}},
-		level: {..._configs.level, ...opts.styles?.level || {}},
-		module: {..._configs.module, ...opts.styles?.module || {}},
-	};
-
-	const getStyle = (level: LoggingLevels, type?: "level" | "module") => {
-		if (!type) {
-			return `color: ${configs.colors[level]}; font-weight: ${configs.weights[level]};`;
-		}
-		const color = configs[type].color || configs.colors[level];
-		const weight = configs[type].weight || configs.weights[level];
-		return `color: ${color}; font-weight: ${weight};`;
-	};
-	const _module = !opts.module ? "": configs.module.format!(opts.module);
-	const getStyles = (method: LoggingLevels, _level: string) => {
-		const style = getStyle(method);
-		const styles: string[] = [];
-		styles.push(style);
-		if (_level && _level.trim() && _level.trim().startsWith("%c")) {
-			styles.push(getStyle(method, "level"));
-		}
-		if (_module && _module.trim() && _module.trim().startsWith("%c")) {
-			styles.push(getStyle(method, "module"));
-		}
-		styles.push(style);
-		return styles;
-	};
+	const _module = configs.module.format(opts.module);
 
 	_LoggingLevels.forEach((method, level) => {
-		const log = (message?: string, ...optionalParams: any[]) => {
-			const _level = configs.level.format!(method);
-			const _date = new Date().toISOString();
-			const _message = `%c${_date} ${_level}${_module}%c${message}`;
-			const styles = getStyles(method, _level);
-
+		const log = (message: string, ...optionalParams: unknown[]) => {
+			const _level = configs.level.format(method);
+			const _message = `%c${now()} ${_level}${_module} ${message}`;
 			const normalizedMethod = getNormalizedMethod(method);
-			console[normalizedMethod](_message, ...styles, ...optionalParams);
+			console[normalizedMethod](_message, `color: ${configs.colors[method]};`, ...optionalParams);
 		};
 		logger[method] = shouldLog(level) ? log : noop;
 	});
 	return logger;
 }
 
-const logger: Logger = getLogger({
-	level: "info"
-});
-export default logger;
+export const logger = getLogger();
