@@ -27,8 +27,7 @@
         "@typescript-eslint/consistent-type-definitions":[
             "error",
             "interface"
-        ],
-        "@typescript-eslint/no-empty-function": "off"
+        ]
     },
     "extends": [
         "eslint:recommended",

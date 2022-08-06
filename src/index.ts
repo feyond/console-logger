@@ -2,11 +2,17 @@ const _LoggingLevels = ["debug", "info", "warn", "error"] as const;
 type LoggingLevels = typeof _LoggingLevels[number];
 type Logger = Record<LoggingLevels, (message: string, ...optionalParams: unknown[]) => void>;
 
+interface SetLevel {
+	setLevel: (level: LoggingLevels) => void;
+}
+
 interface Options {
+	level?: LoggingLevels
 	module?: string;
 }
 
 const configs = {
+	defaultLevel: "info",
 	colors: {
 		debug: "#0d6efd",
 		info: "#198754",
@@ -20,7 +26,7 @@ const configs = {
 		format: (module?: string) => (!module ? "" : `[${module}]`.padStart(12, " ")),
 	},
 };
-const noop = () => {};
+
 const getNormalizedMethod = function (method: LoggingLevels) {
 	switch (method) {
 		case "debug":
@@ -46,25 +52,46 @@ function now(): string {
 	].join(" ");
 }
 
-export function getLogger(level: LoggingLevels = "debug", opts: Options = {}) {
-	const logger: Logger = {} as Logger;
-	const userLevel = _LoggingLevels.findIndex((_level) => _level === level);
-	const shouldLog = (level: number) => {
-		return level >= userLevel;
+export function getLogger(opts: Options = {}) {
+	const logger = {} as Logger & SetLevel;
+	const _module = configs.module.format(opts.module);
+	Reflect.defineProperty(logger, "level", {
+		value: opts.level,
+		writable: true,
+	});
+
+	Reflect.defineProperty(logger, "setLevel", {
+		value: (level: LoggingLevels) => {
+			Reflect.set(logger, "level", level);
+		},
+		writable: true,
+		configurable: false,
+	});
+
+	const shouldLog = (_current: number) => {
+		const baseLevel = Reflect.get(logger, "level") || configs.defaultLevel;
+		const userLevel = _LoggingLevels.findIndex((_level) => _level === baseLevel);
+		return _current >= userLevel;
 	};
 
-	const _module = configs.module.format(opts.module);
-
 	_LoggingLevels.forEach((method, level) => {
-		const log = (message: string, ...optionalParams: unknown[]) => {
-			const _level = configs.level.format(method);
-			const _message = `%c${now()} ${_level}${_module} ${message}`;
-			const normalizedMethod = getNormalizedMethod(method);
-			console[normalizedMethod](_message, `color: ${configs.colors[method]};`, ...optionalParams);
-		};
-		logger[method] = shouldLog(level) ? log : noop;
+		Reflect.defineProperty(logger, method, {
+			value: (message: string, ...optionalParams: unknown[]) => {
+				if (shouldLog(level)) {
+					const _level = configs.level.format(method);
+					const _message = `%c${now()} ${_level}${_module} ${message}`;
+					const normalizedMethod = getNormalizedMethod(method);
+					console[normalizedMethod](_message, `color: ${configs.colors[method]};`, ...optionalParams);
+				}
+			},
+		});
 	});
+
 	return logger;
+}
+
+export function setDefaultLevel(defaultLevel: LoggingLevels) {
+	configs.defaultLevel = defaultLevel;
 }
 
 export const logger = getLogger();

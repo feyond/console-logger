@@ -10,7 +10,7 @@ describe("index.js", () => {
 		});
 	});
 
-	const log = getLogger("debug", {
+	const log = getLogger({
 		module: "test",
 	});
 
