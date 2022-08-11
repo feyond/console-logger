@@ -2,19 +2,15 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "allowJs": false,
-    "declaration": false,
+    "declaration": true,
     "removeComments": true,
     "strict": true,
     "moduleResolution": "node",
-    "baseUrl": "./src",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "outDir": "lib"
   },
-  "include": [
-    "src"
-  ],
   "exclude": [
     "node_modules",
     "test",
@@ -23,7 +19,6 @@
     "esm",
     "cjs",
     "ums",
-    "index.d.ts",
     "typings"
   ]
 }

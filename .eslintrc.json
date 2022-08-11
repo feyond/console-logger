@@ -27,12 +27,16 @@
         "@typescript-eslint/consistent-type-definitions":[
             "error",
             "interface"
-        ]
+        ],
+        "@typescript-eslint/no-namespace": "warn",
+        "@typescript-eslint/no-empty-interface": "warn",
+        "no-console": "off"
     },
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:prettier/recommended"
-    ]
+    ],
+    "ignorePatterns": ["dist", "lib", "node_modules", "coverage"]
 }

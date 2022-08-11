@@ -7,12 +7,11 @@ interface SetLevel {
 }
 
 interface Options {
-	level?: LoggingLevels
+	level?: LoggingLevels;
 	module?: string;
 }
 
 const configs = {
-	defaultLevel: "info",
 	colors: {
 		debug: "#0d6efd",
 		info: "#198754",
@@ -23,7 +22,7 @@ const configs = {
 		format: (level: string) => `[${level.toUpperCase()}]`.padEnd(9, " "),
 	},
 	module: {
-		format: (module?: string) => (!module ? "" : `[${module}]`.padStart(12, " ")),
+		format: (module?: string) => (!module ? "" : `[${module}]`.padStart(10, " ")),
 	},
 };
 
@@ -36,13 +35,8 @@ const getNormalizedMethod = function (method: LoggingLevels) {
 		case "error":
 			return "log";
 	}
-	return assertUnreachable(method);
+	throw new Error("unexpect log level: " + method);
 };
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function assertUnreachable(x: never): never {
-	throw new Error("Didn't expect to get here");
-}
 
 function now(): string {
 	const _now = new Date();
@@ -50,6 +44,29 @@ function now(): string {
 		[_now.getFullYear().toString(), _now.getMonth().toString().padStart(2, "0"), _now.getDate().toString().padStart(2, "0")].join("-"),
 		[_now.getHours().toString().padStart(2, "0"), _now.getMinutes().toString().padStart(2, "0"), _now.getSeconds().toString().padStart(2, "0")].join(":"),
 	].join(" ");
+}
+
+function getLogLevel(logger: Logger & SetLevel): LoggingLevels {
+	return Reflect.get(logger, "level") || getDefaultLevel();
+}
+
+function getDefaultLevel(): LoggingLevels {
+	if (window && window.__LOG_LEVEL__) {
+		return window.__LOG_LEVEL__;
+	}
+	return "info";
+}
+
+export function setDefaultLevel(defaultLevel: LoggingLevels) {
+	if (window) {
+		window.__LOG_LEVEL__ = defaultLevel;
+	}
+}
+
+declare global {
+	interface Window {
+		__LOG_LEVEL__: LoggingLevels;
+	}
 }
 
 export function getLogger(opts: Options = {}) {
@@ -69,7 +86,7 @@ export function getLogger(opts: Options = {}) {
 	});
 
 	const shouldLog = (_current: number) => {
-		const baseLevel = Reflect.get(logger, "level") || configs.defaultLevel;
+		const baseLevel = getLogLevel(logger);
 		const userLevel = _LoggingLevels.findIndex((_level) => _level === baseLevel);
 		return _current >= userLevel;
 	};
@@ -89,9 +106,3 @@ export function getLogger(opts: Options = {}) {
 
 	return logger;
 }
-
-export function setDefaultLevel(defaultLevel: LoggingLevels) {
-	configs.defaultLevel = defaultLevel;
-}
-
-export const logger = getLogger();
