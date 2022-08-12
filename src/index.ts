@@ -50,17 +50,19 @@ function getLogLevel(logger: Logger & SetLevel): LoggingLevels {
 	return Reflect.get(logger, "level") || getDefaultLevel();
 }
 
+let __default_log_level__: LoggingLevels = "info";
 function getDefaultLevel(): LoggingLevels {
-	if (window && window.__LOG_LEVEL__) {
+	if (window !== undefined && window.__LOG_LEVEL__) {
 		return window.__LOG_LEVEL__;
 	}
-	return "info";
+	return __default_log_level__;
 }
 
 export function setDefaultLevel(defaultLevel: LoggingLevels) {
-	if (window) {
-		window.__LOG_LEVEL__ = defaultLevel;
+	if (window !== undefined) {
+		return (window.__LOG_LEVEL__ = defaultLevel);
 	}
+	__default_log_level__ = defaultLevel;
 }
 
 declare global {
