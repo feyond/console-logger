@@ -30,7 +30,8 @@
         ],
         "@typescript-eslint/no-namespace": "warn",
         "@typescript-eslint/no-empty-interface": "warn",
-        "no-console": "off"
+        "no-console": "off",
+        "no-empty": "warn"
     },
     "extends": [
         "eslint:recommended",

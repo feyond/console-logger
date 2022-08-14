@@ -51,17 +51,22 @@ function getLogLevel(logger: Logger & SetLevel): LoggingLevels {
 }
 
 let __default_log_level__: LoggingLevels = "info";
+
 function getDefaultLevel(): LoggingLevels {
-	if (window !== undefined && window.__LOG_LEVEL__) {
-		return window.__LOG_LEVEL__;
-	}
+	try {
+		if (typeof window !== undefined && window != undefined && window.__LOG_LEVEL__) {
+			return window.__LOG_LEVEL__;
+		}
+	} catch (e) {}
 	return __default_log_level__;
 }
 
 export function setDefaultLevel(defaultLevel: LoggingLevels) {
-	if (window !== undefined) {
-		return (window.__LOG_LEVEL__ = defaultLevel);
-	}
+	try {
+		if (typeof window !== undefined && window != undefined) {
+			return (window.__LOG_LEVEL__ = defaultLevel);
+		}
+	} catch (e) {}
 	__default_log_level__ = defaultLevel;
 }
 
