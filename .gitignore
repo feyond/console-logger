@@ -6,3 +6,4 @@
 /cjs/
 .DS_Store
 package-lock.json
+jest.config.ts.bak

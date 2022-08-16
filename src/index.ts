@@ -1,115 +1,113 @@
-const _LoggingLevels = ["debug", "info", "warn", "error"] as const;
-type LoggingLevels = typeof _LoggingLevels[number];
-type Logger = Record<LoggingLevels, (message: string, ...optionalParams: unknown[]) => void>;
+import { Format } from "./format";
 
-interface SetLevel {
-	setLevel: (level: LoggingLevels) => void;
+const _LoggingLevels = ["debug", "verbose", "info", "warn", "error"] as const;
+export type LoggingLevelName = typeof _LoggingLevels[number];
+
+export const LoggingLevels = _LoggingLevels.reduce(function (result, item, index) {
+	result[item] = index + 1;
+	return result;
+}, {} as Record<LoggingLevelName, number>);
+
+interface LoggingMethod {
+	(message: string, ...params: any[]): void;
+	(infoObject: object): void;
 }
 
-interface Options {
-	level?: LoggingLevels;
-	module?: string;
+export function createLogger(options: Partial<LoggerOptions> = {}) {
+	const logger = new Logger({ ...options });
+	return new Proxy(logger, {
+		get: (_, method: LoggingLevelName) => {
+			if (!(method in LoggingLevels)) {
+				throw new Error(`Level "${method}" not defined`);
+			}
+
+			return (...args: any[]) => {
+				if (args.length === 0) {
+					return logger.log(method, "");
+				}
+				const [message, ...splat] = args;
+				logger.log(method, message, ...splat);
+			};
+		},
+	}) as any as Record<LoggingLevelName, LoggingMethod>;
 }
 
-const configs = {
-	colors: {
-		debug: "#0d6efd",
-		info: "#198754",
-		warn: "#ffc107",
-		error: "#dc3545",
-	},
-	level: {
-		format: (level: string) => `[${level.toUpperCase()}]`.padEnd(9, " "),
-	},
-	module: {
-		format: (module?: string) => (!module ? "" : `[${module}]`.padStart(10, " ")),
-	},
-};
+export interface LoggingEntry {
+	[index: string]: any;
 
-const getNormalizedMethod = function (method: LoggingLevels) {
-	switch (method) {
-		case "debug":
-		case "info":
-			return method;
-		case "warn":
-		case "error":
-			return "log";
+	level: LoggingLevelName;
+	message: any;
+	stack?: any;
+	params: any[];
+}
+
+interface ConsoleLog {
+	(info: LoggingEntry): void;
+}
+
+export interface LoggerOptions {
+	level?: LoggingLevelName;
+	format?: Format;
+	meta?: Record<string, any>;
+	transport?: ConsoleLog;
+}
+
+export class Logger {
+	meta?: Record<string, any>;
+	format!: Format;
+	transport!: ConsoleLog;
+	private readonly _level?: LoggingLevelName;
+
+	constructor(options: LoggerOptions) {
+		this.configure(options);
 	}
-	throw new Error("unexpect log level: " + method);
-};
 
-function now(): string {
-	const _now = new Date();
-	return [
-		[_now.getFullYear().toString(), _now.getMonth().toString().padStart(2, "0"), _now.getDate().toString().padStart(2, "0")].join("-"),
-		[_now.getHours().toString().padStart(2, "0"), _now.getMinutes().toString().padStart(2, "0"), _now.getSeconds().toString().padStart(2, "0")].join(":"),
-	].join(" ");
-}
+	private configure(options: LoggerOptions) {
+		this.meta = options.meta || {};
+		this.transport = options.transport || ({} as ConsoleLog);
+	}
 
-function getLogLevel(logger: Logger & SetLevel): LoggingLevels {
-	return Reflect.get(logger, "level") || getDefaultLevel();
-}
-
-let __default_log_level__: LoggingLevels = "info";
-
-function getDefaultLevel(): LoggingLevels {
-	try {
-		if (typeof window !== undefined && window != undefined && window.__LOG_LEVEL__) {
-			return window.__LOG_LEVEL__;
+	log(level: LoggingLevelName, msg: any, ...params: any[]) {
+		if (LoggingLevels[level] < LoggingLevels[this.level]) {
+			return;
 		}
-	} catch (e) {}
-	return __default_log_level__;
+		if (msg instanceof Error) {
+			return this.transport({ ...this.meta, level, message: msg.message, stack: msg.stack, params });
+		}
+		if (typeof msg === "object" && msg.message) {
+			return this.transport({ ...this.meta, level, ...msg, params });
+		}
+
+		this.transport({ ...this.meta, level, message: msg, params });
+	}
+
+	get level(): LoggingLevelName {
+		return this._level || getDefaultLevel();
+	}
 }
 
-export function setDefaultLevel(defaultLevel: LoggingLevels) {
-	try {
-		if (typeof window !== undefined && window != undefined) {
-			return (window.__LOG_LEVEL__ = defaultLevel);
-		}
-	} catch (e) {}
-	__default_log_level__ = defaultLevel;
-}
+let __DEFAULT_LOGGING_LEVEL__: LoggingLevelName = "info";
 
 declare global {
 	interface Window {
-		__LOG_LEVEL__: LoggingLevels;
+		__DEFAULT_LOGGING_LEVEL__: LoggingLevelName;
 	}
 }
 
-export function getLogger(opts: Options = {}) {
-	const logger = {} as Logger & SetLevel;
-	const _module = configs.module.format(opts.module);
-	Reflect.defineProperty(logger, "level", {
-		value: opts.level,
-		writable: true,
-	});
+export function getDefaultLevel(): LoggingLevelName {
+	try {
+		if (typeof window !== undefined && window != undefined && window.__DEFAULT_LOGGING_LEVEL__) {
+			return window.__DEFAULT_LOGGING_LEVEL__;
+		}
+	} catch (e) {}
+	return __DEFAULT_LOGGING_LEVEL__;
+}
 
-	Reflect.defineProperty(logger, "setLevel", {
-		value: (level: LoggingLevels) => {
-			Reflect.set(logger, "level", level);
-		},
-		writable: true,
-		configurable: false,
-	});
-
-	const shouldLog = (_current: number) => {
-		const baseLevel = getLogLevel(logger);
-		const userLevel = _LoggingLevels.findIndex((_level) => _level === baseLevel);
-		return _current >= userLevel;
-	};
-
-	_LoggingLevels.forEach((method, level) => {
-		Reflect.defineProperty(logger, method, {
-			value: (message: string, ...optionalParams: unknown[]) => {
-				if (shouldLog(level)) {
-					const _level = configs.level.format(method);
-					const _message = `%c${now()} ${_level}${_module} ${message}`;
-					const normalizedMethod = getNormalizedMethod(method);
-					console[normalizedMethod](_message, `color: ${configs.colors[method]};`, ...optionalParams);
-				}
-			},
-		});
-	});
-
-	return logger;
+export function setDefaultLevel(defaultLevel: LoggingLevelName) {
+	try {
+		if (typeof window !== undefined && window != undefined) {
+			return (window.__DEFAULT_LOGGING_LEVEL__ = defaultLevel);
+		}
+	} catch (e) {}
+	__DEFAULT_LOGGING_LEVEL__ = defaultLevel;
 }
