@@ -1,12 +1,7 @@
-import { Format } from "./format";
-
-const _LoggingLevels = ["debug", "verbose", "info", "warn", "error"] as const;
-export type LoggingLevelName = typeof _LoggingLevels[number];
-
-export const LoggingLevels = _LoggingLevels.reduce(function (result, item, index) {
-	result[item] = index + 1;
-	return result;
-}, {} as Record<LoggingLevelName, number>);
+import { Format, formats } from "./format";
+import { STYLE_PREFIX } from "./format/combine";
+import { getDefaultLevel, LoggingLevelName, LoggingLevels } from "./levels";
+import styles from "./styles";
 
 interface LoggingMethod {
 	(message: string, ...params: any[]): void;
@@ -33,29 +28,41 @@ export function createLogger(options: Partial<LoggerOptions> = {}) {
 }
 
 export interface LoggingEntry {
-	[index: string]: any;
-
 	level: LoggingLevelName;
 	message: any;
-	stack?: any;
 	params: any[];
 }
 
-interface ConsoleLog {
-	(info: LoggingEntry): void;
+interface Transport {
+	(info: LoggingEntry, format: Format): void;
 }
+
+const BrowserConsole: Transport = (info, format) => {
+	// [datetime] [label] [level] message, {...args}
+	const entry = format.transform(info, format.options);
+	if (typeof entry === "string") {
+		// eslint-disable-next-line no-console
+		console.log(entry);
+	} else if (Array.isArray(entry)) {
+		// eslint-disable-next-line no-console
+		console.log(...entry);
+	} else {
+		// eslint-disable-next-line no-console
+		entry.style && !entry.value.startsWith(STYLE_PREFIX) ? console.log(STYLE_PREFIX + entry.value, entry.style) : console.log(entry.value);
+	}
+};
 
 export interface LoggerOptions {
 	level?: LoggingLevelName;
 	format?: Format;
-	meta?: Record<string, any>;
-	transport?: ConsoleLog;
+	label?: string;
+	timestamp?: boolean | string;
+	transport?: Transport;
 }
 
 export class Logger {
-	meta?: Record<string, any>;
 	format!: Format;
-	transport!: ConsoleLog;
+	transport!: Transport;
 	private readonly _level?: LoggingLevelName;
 
 	constructor(options: LoggerOptions) {
@@ -63,51 +70,46 @@ export class Logger {
 	}
 
 	private configure(options: LoggerOptions) {
-		this.meta = options.meta || {};
-		this.transport = options.transport || ({} as ConsoleLog);
+		this.transport = options.transport || BrowserConsole;
+		const fmtList: Format[] = [];
+		if (!("timestamp" in options) || options.timestamp) {
+			fmtList.push(
+				formats.timestamp({
+					format: typeof options.timestamp === "string" ? options.timestamp : undefined,
+				})
+			);
+		}
+		fmtList.push(formats.level());
+
+		if (options.label) {
+			fmtList.push(
+				formats.label({
+					value: options.label,
+					style: styles.bgBlack.gray.bold.toString(),
+				})
+			);
+		}
+
+		fmtList.push(formats.message({ style: styles.underline.toString() }));
+		fmtList.push(formats.params());
+		this.format = options.format || formats.combine(...fmtList);
 	}
 
 	log(level: LoggingLevelName, msg: any, ...params: any[]) {
 		if (LoggingLevels[level] < LoggingLevels[this.level]) {
 			return;
 		}
-		if (msg instanceof Error) {
-			return this.transport({ ...this.meta, level, message: msg.message, stack: msg.stack, params });
-		}
-		if (typeof msg === "object" && msg.message) {
-			return this.transport({ ...this.meta, level, ...msg, params });
+		// if (msg instanceof Error) {
+		// 	return this.transport({ level, message: msg.message, params }, this.format);
+		// }
+		if (typeof msg === "object") {
+			return this.transport({ level, message: "", params: [msg] }, this.format);
 		}
 
-		this.transport({ ...this.meta, level, message: msg, params });
+		this.transport({ level, message: msg, params }, this.format);
 	}
 
 	get level(): LoggingLevelName {
 		return this._level || getDefaultLevel();
 	}
-}
-
-let __DEFAULT_LOGGING_LEVEL__: LoggingLevelName = "info";
-
-declare global {
-	interface Window {
-		__DEFAULT_LOGGING_LEVEL__: LoggingLevelName;
-	}
-}
-
-export function getDefaultLevel(): LoggingLevelName {
-	try {
-		if (typeof window !== undefined && window != undefined && window.__DEFAULT_LOGGING_LEVEL__) {
-			return window.__DEFAULT_LOGGING_LEVEL__;
-		}
-	} catch (e) {}
-	return __DEFAULT_LOGGING_LEVEL__;
-}
-
-export function setDefaultLevel(defaultLevel: LoggingLevelName) {
-	try {
-		if (typeof window !== undefined && window != undefined) {
-			return (window.__DEFAULT_LOGGING_LEVEL__ = defaultLevel);
-		}
-	} catch (e) {}
-	__DEFAULT_LOGGING_LEVEL__ = defaultLevel;
 }
