@@ -1,14 +1,22 @@
 
 # Usage
 
-1. Install
+## Install
 ```npm
 npm install @feyond/console-logging
 ```
 
-2. Import default logger(level = debug)
+## Import `createLogger`(level = info)
 ```ts
-import { logger } from '@feyond/console-logging';
+import { createLogger } from '@feyond/console-logging';
+
+const logger = createLogger({
+    // level?: LoggingLevelName
+    // label?: string
+    // timestamp?: boolean | string
+    // format?: Format
+    // transport?: Transport
+});
 
 logger.debug("test debug", { x: 1 });
 logger.info("test info", { y: "aaa" });
@@ -16,13 +24,4 @@ logger.warn("test warn", { ss: true });
 logger.error("test error", { z: { e: 8 } });
 ```
 
-2. Custom `logger`
-```ts
-import { getLogger } from '@feyond/console-logging';
-const logger = getLogger({
-    level: 'info', //'debug' | 'info' | 'warn' | 'error',
-    module: string
-});
-logger.debug("test debug", { x: 1 }); // print nothing
-logger.info("test info", { y: "aaa" });
-```
+
