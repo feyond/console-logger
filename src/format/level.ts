@@ -1,4 +1,4 @@
-import format, { Format } from "./format";
+import { Format, format } from "./format";
 import { colors } from "../levels";
 
 export interface LevelFormat {
@@ -6,7 +6,7 @@ export interface LevelFormat {
 }
 
 const level: LevelFormat = format((info) => {
-	return { value: `${info.level}`, style: colors[info.level].capitalize.toString() };
+	return { value: `${info.level}`, style: colors[info.level]().capitalize.toString() };
 });
 
 export default level;

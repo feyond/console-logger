@@ -1,4 +1,4 @@
-import proxy, { Style } from "./styles";
+import styles, { Style } from "./styles";
 
 export const _LoggingLevels = ["debug", "verbose", "info", "warn", "error"] as const;
 export type LoggingLevelName = typeof _LoggingLevels[number];
@@ -33,10 +33,10 @@ export function setDefaultLevel(defaultLevel: LoggingLevelName) {
 	__DEFAULT_LOGGING_LEVEL__ = defaultLevel;
 }
 
-export const colors: Record<LoggingLevelName, Style> = {
-	debug: proxy.blue,
-	verbose: proxy.black,
-	info: proxy.green,
-	warn: proxy.gold,
-	error: proxy.red,
+export const colors: Record<LoggingLevelName, () => Style> = {
+	debug: () => styles().blue,
+	verbose: () => styles().black,
+	info: () => styles().green,
+	warn: () => styles().gold,
+	error: () => styles().red,
 };

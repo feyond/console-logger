@@ -1,11 +1,16 @@
 import { Format, TransformFunction } from "./format";
+
 export interface CombineFormat {
-	(...formats: Format[]): Format<Format[]>;
+	(...formats: Format[]): Format<void>;
 }
+
 export const STYLE_PREFIX = "%c";
 const combine: CombineFormat = (...formats: Format[]) => {
-	return new (class extends Format {
-		transform: TransformFunction<Format[]> = (entry) => {
+	if (!formats || formats.length === 0) {
+		throw new Error("at least one or more formats required");
+	}
+	return new (class extends Format<void> {
+		transform: TransformFunction<void> = (entry) => {
 			const messages: string[] = [];
 			const styles: string[] = [];
 			let params: any[] = [];

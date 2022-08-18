@@ -1,4 +1,4 @@
-import { Format, formats } from "./format";
+import { formats, Format } from "./format";
 import { STYLE_PREFIX } from "./format/combine";
 import { getDefaultLevel, LoggingLevelName, LoggingLevels } from "./levels";
 import styles from "./styles";
@@ -63,13 +63,14 @@ export interface LoggerOptions {
 export class Logger {
 	format!: Format;
 	transport!: Transport;
-	private readonly _level?: LoggingLevelName;
+	private _level?: LoggingLevelName;
 
 	constructor(options: LoggerOptions) {
 		this.configure(options);
 	}
 
 	private configure(options: LoggerOptions) {
+		this._level = options.level;
 		this.transport = options.transport || BrowserConsole;
 		const fmtList: Format[] = [];
 		if (!("timestamp" in options) || options.timestamp) {
@@ -85,12 +86,12 @@ export class Logger {
 			fmtList.push(
 				formats.label({
 					value: options.label,
-					style: styles.bgBlack.gray.bold.toString(),
+					style: styles().bgBlack.gray.bold.toString(),
 				})
 			);
 		}
 
-		fmtList.push(formats.message({ style: styles.underline.toString() }));
+		fmtList.push(formats.message({ style: styles().underline.toString() }));
 		fmtList.push(formats.params());
 		this.format = options.format || formats.combine(...fmtList);
 	}

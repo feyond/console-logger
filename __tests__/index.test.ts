@@ -1,9 +1,5 @@
 import { createLogger, LoggingEntry } from "../src";
-import * as winston from "winston";
-
-const _console = winston.createLogger({
-	transports: [new winston.transports.Console()],
-});
+import { Format } from "../src/format";
 
 it("log 默认级别 info", () => {
 	const mockTransport = jest.fn();
@@ -16,16 +12,12 @@ it("log 默认级别 info", () => {
 
 	logger.info("test");
 	expect(mockTransport).toBeCalled();
-	expect(mockTransport).toBeCalledWith({ level: "info", message: "test", params: [] });
+	expect(mockTransport).toBeCalledWith({ level: "info", message: "test", params: [] }, expect.any(Format));
 });
 
-it("log string", (done) => {
+it("log info string", (done) => {
 	const logger = createLogger({
 		transport: (info: LoggingEntry) => {
-			// eslint-disable-next-line no-console
-			console.log(info);
-			_console.log(info);
-			// expect(info.service).toEqual("test");
 			expect(info.level).toEqual("info");
 			expect(info.params.length).toEqual(0);
 			expect(info.message).toEqual("test level info");
@@ -39,12 +31,9 @@ it("log error", (done) => {
 	const error = new Error("test");
 	const logger = createLogger({
 		transport: (info: LoggingEntry) => {
-			// eslint-disable-next-line no-console
-			// expect(info.service).toEqual("test");
 			expect(info.level).toEqual("error");
-			// expect(info.stack).toEqual(error.stack);
-			expect(info.params.length).toEqual(0);
-			expect(info.message).toEqual(error.message);
+			expect(info.params).toEqual([error]);
+			expect(info.message).toEqual("");
 			done();
 		},
 	});
@@ -52,26 +41,44 @@ it("log error", (done) => {
 	logger.error(error);
 });
 
-it("log object", (done) => {
+it("log warn object", (done) => {
+	const obj = { x: 1, y: "aa" };
 	const logger = createLogger({
 		transport: (info: LoggingEntry) => {
-			// eslint-disable-next-line no-console
-			console.log(info);
-			_console.info({ x: 1, y: "aa" });
-			// expect(info.service).toEqual("test");
-			expect(info.level).toEqual("info");
-			expect(info.params.length).toEqual(0);
-			expect(info.message).toEqual({ x: 1, y: "aa" });
+			expect(info.level).toEqual("warn");
+			expect(info.params).toEqual([obj]);
+			expect(info.message).toEqual("");
 			done();
 		},
 	});
 
-	logger.info(["1", 2]);
-	logger.info({ x: 1, y: "aa" });
+	logger.warn(obj);
 });
 
-it("console log", () => {
-	const logger = createLogger({ label: "Test", level: "debug" });
+it("log verbose empty", (done) => {
+	const logger = createLogger({
+		level: "debug",
+		transport: (info: LoggingEntry) => {
+			expect(info.level).toEqual("verbose");
+			expect(info.params).toEqual([]);
+			expect(info.message).toEqual("");
+			done();
+		},
+	});
 
-	logger.info("Test console log", ["1", 2]);
+	Reflect.get(logger, "verbose")();
+});
+
+it("log unknown level", () => {
+	const transport = jest.fn();
+	const logger = createLogger({
+		transport: transport,
+	});
+
+	const unknownLevel = "test";
+	expect(() => {
+		Reflect.get(logger, unknownLevel)();
+	}).toThrow(`Level "${unknownLevel}" not defined`);
+
+	expect(transport).not.toBeCalled();
 });

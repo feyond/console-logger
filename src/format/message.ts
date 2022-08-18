@@ -1,8 +1,9 @@
-import format, { Format } from "./format";
+import { Format, format } from "./format";
 
 export interface MessageFormat {
 	(opts?: MessageOptions): Format<MessageOptions>;
 }
+
 export interface MessageOptions {
 	style?: string;
 }

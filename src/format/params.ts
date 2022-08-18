@@ -1,4 +1,4 @@
-import format, { Format } from "./format";
+import { Format, format } from "./format";
 
 export interface ParamFormat {
 	(): Format<void>;

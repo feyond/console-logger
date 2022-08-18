@@ -9,17 +9,12 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "outDir": "lib"
+    "outDir": "lib",
   },
   "include": ["src"],
   "exclude": [
     "node_modules",
-    "test",
-    "dist",
+    "__tests__",
     "lib",
-    "esm",
-    "cjs",
-    "ums",
-    "typings"
   ]
 }

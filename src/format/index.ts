@@ -5,6 +5,8 @@ import { LevelFormat } from "./level";
 import { MessageFormat } from "./message";
 import { ParamFormat } from "./params";
 
+export * from "./format";
+
 export interface Formats {
 	timestamp: TimestampFormat;
 	combine: CombineFormat;

@@ -11,7 +11,6 @@ const colors = {
 	pink: "pink",
 	cyan: "cyan",
 };
-
 const lib = {
 	big: "font-size: 2em",
 	bold: "font-weight: bold",
@@ -36,6 +35,7 @@ class ConsoleStyle {
 
 	clear() {
 		this.style = baseStyles;
+		return this;
 	}
 
 	addStyle(value: string) {
@@ -55,24 +55,28 @@ type StyleMethod<T extends string> = {
 };
 
 export type Style = StyleMethod<StyleKey> & ConsoleStyle;
-const styles = new ConsoleStyle();
-const proxy = new Proxy(styles, {
-	get: (target, prop) => {
-		return prop in target ? Reflect.get(target, prop) : styles;
-	},
-}) as Style;
 
-const define = (name: string, value: string) => {
-	Reflect.defineProperty(proxy, name, {
-		get() {
-			styles.addStyle(value);
-			return proxy;
+const styles = () => {
+	const __styles = new ConsoleStyle();
+	const instance = new Proxy(__styles, {
+		get: (target, prop) => {
+			return prop in target ? Reflect.get(target, prop) : __styles;
 		},
-	});
+	}) as Style;
+
+	const define = (name: string, value: string) => {
+		Reflect.defineProperty(instance, name, {
+			get() {
+				__styles.addStyle(value);
+				return instance;
+			},
+		});
+	};
+
+	for (const key in _styles) {
+		define(key, Reflect.get(_styles, key));
+	}
+	return instance;
 };
 
-for (const key in _styles) {
-	define(key, Reflect.get(_styles, key));
-}
-
-export default proxy;
+export default styles;

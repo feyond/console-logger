@@ -10,10 +10,10 @@ export interface TransformFunction<T> {
 }
 
 export abstract class Format<T = any> {
-	options?: T;
+	options: T;
 	abstract transform: TransformFunction<T>;
 
-	constructor(opts?: T) {
+	constructor(opts: T) {
 		this.options = opts;
 	}
 }
@@ -24,5 +24,3 @@ export function format<T = any>(fn: TransformFunction<T>) {
 			transform = fn;
 		})(opts);
 }
-
-export default format;
