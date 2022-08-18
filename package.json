@@ -10,9 +10,9 @@
   "scripts": {
     "build": "rimraf ./lib && npm run build:types && npm run build:js",
     "build:js": "babel src --out-dir ./lib --extensions \".ts\"",
-    "build:vite": "vite build --mode development && vite build --mode production && npm run build:types",
     "build:types": "tsc --declaration --emitDeclarationOnly --outDir ./lib",
-    "prepublish": "npm run build",
+    "prepublish": "npm run test && npm run build",
+    "postpublish": "rimraf ./lib",
     "test": "jest",
     "lint": "eslint --ext .ts",
     "lint:fix": "eslint --fix --ext .ts"
@@ -69,7 +69,6 @@
   "dependencies": {
     "@babel/runtime": "^7.18.9",
     "core-js": "^3.24.1",
-    "fecha": "^4.2.3",
-    "readable-stream": "^3.6.0"
+    "fecha": "^4.2.3"
   }
 }
