@@ -5,22 +5,10 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "exports": {
-    ".": {
-      "default": "lib/index.js",
-      "types": "lib/index.d.ts"
-    },
-    "./levels": {
-      "default": "lib/levels.js",
-      "types": "lib/levels.d.ts"
-    },
-    "./styles": {
-      "default": "lib/styles.js",
-      "types": "lib/styles.d.ts"
-    },
-    "./format": {
-      "default": "lib/format/index.js",
-      "types": "lib/format/index.d.ts"
-    }
+    ".": "./lib/index.js",
+    "./levels": "./lib/levels.js",
+    "./styles": "./lib/styles.js",
+    "./format": "./lib/format/index.js"
   },
   "typesVersions": {
     "*": {
