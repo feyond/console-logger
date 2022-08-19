@@ -1,6 +1,6 @@
 {
   "name": "@feyond/console-logging",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Browser console log printing wrapper supports log level control.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -24,9 +24,15 @@
   },
   "typesVersions": {
     "*": {
-      "levels": ["lib/levels.d.ts"],
-      "styles": ["lib/styles.d.ts"],
-      "format": ["lib/format.d.ts"]
+      "levels": [
+        "lib/levels.d.ts"
+      ],
+      "styles": [
+        "lib/styles.d.ts"
+      ],
+      "format": [
+        "lib/format.d.ts"
+      ]
     }
   },
   "files": [
